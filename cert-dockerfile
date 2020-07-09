@@ -1,0 +1,9 @@
+ARG IMAGE_NAME
+FROM gcr.io/paketo-buildpacks/run:base
+USER root
+COPY ca.crt /usr/local/share/ca-certificates/company-ca.crt
+RUN update-ca-certificates
+
+FROM $IMAGE_NAME
+COPY --from=0 /etc/ssl/certs /etc/ssl/certs
+
