@@ -2,13 +2,7 @@
 
 set -ex
 
-
-# export DOCKER_CONFIG=/kaniko/.docker
-
-#create ca cert file
-
-echo -e ${CA_CERT} > ca.crt
-
+#get the builder image
 BUILDER_IMAGE=$(kubectl get clusterbuilder default -o=jsonpath='{.spec.image}')
 
 
@@ -21,17 +15,14 @@ REBASE_IMAGE=$(kubectl get deployment -n kpack kpack-controller -o=jsonpath='{.s
 REBASE_IMAGE_BASE=$(echo ${REBASE_IMAGE} | cut -f1 -d"@")
 
 #build the new docker base image with the cert
-# /kaniko/executor --dockerfile cert-dockerfile --destination ${REGISTRY_URL}/${BUILDER_IMAGE} --build-arg IMAGE_NAME=${BUILDER_IMAGE} --skip-tls-verify --cleanup
 docker build -t ${REGISTRY_URL}/${BUILDER_IMAGE} --build-arg IMAGE_NAME=${BUILDER_IMAGE} . -f cert-dockerfile
 docker push ${REGISTRY_URL}/${BUILDER_IMAGE}
 
 #build the new build init image
-# /kaniko/executor --dockerfile cert-dockerfile --destination ${REGISTRY_URL}/${BUILD_INIT_IMAGE_BASE} --build-arg IMAGE_NAME=${BUILD_INIT_IMAGE} --skip-tls-verify
 docker build -t ${REGISTRY_URL}/${BUILD_INIT_IMAGE_BASE}  --build-arg IMAGE_NAME=${BUILD_INIT_IMAGE} . -f cert-dockerfile
 docker push ${REGISTRY_URL}/${BUILD_INIT_IMAGE_BASE}
 
 #build the new REBASE image
-# /kaniko/executor --dockerfile cert-dockerfile --destination ${REGISTRY_URL}/${REBASE_IMAGE_BASE} --build-arg IMAGE_NAME=${REBASE_IMAGE} --skip-tls-verify
 docker build -t ${REGISTRY_URL}/${REBASE_IMAGE_BASE}  --build-arg IMAGE_NAME=${REBASE_IMAGE} . -f cert-dockerfile
 docker push ${REGISTRY_URL}/${REBASE_IMAGE_BASE}
 
