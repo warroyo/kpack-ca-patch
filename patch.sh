@@ -2,6 +2,8 @@
 
 set -ex
 
+source vars.env
+
 #get the builder image
 BUILDER_IMAGE=$(kubectl get clusterbuilder default -o=jsonpath='{.spec.image}')
 
